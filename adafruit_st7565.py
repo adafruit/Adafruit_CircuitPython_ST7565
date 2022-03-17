@@ -52,6 +52,9 @@ class ST7565(framebuf.FrameBuffer):
     # LCD Page Order
     pagemap = (0, 1, 2, 3, 4, 5, 6, 7)
 
+    # LCD Start Bytes
+    start_bytes = 0
+
     CMD_DISPLAY_OFF = const(0xAE)
     CMD_DISPLAY_ON = const(0xAF)
     CMD_SET_DISP_START_LINE = const(0x40)
@@ -146,9 +149,9 @@ class ST7565(framebuf.FrameBuffer):
             # Set page
             self.write_cmd(self.CMD_SET_PAGE | self.pagemap[page])
             # Set lower bits of column
-            self.write_cmd(self.CMD_SET_COLUMN_LOWER | (0 & 0xF))
+            self.write_cmd(self.CMD_SET_COLUMN_LOWER | (self.start_bytes & 0xF))
             # Set upper bits of column
-            self.write_cmd(self.CMD_SET_COLUMN_UPPER | ((0 >> 4) & 0xF))
+            self.write_cmd(self.CMD_SET_COLUMN_UPPER | ((self.start_bytes >> 4) & 0xF))
 
             # Page start row
             row_start = page << 7
