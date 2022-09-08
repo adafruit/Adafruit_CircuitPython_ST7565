@@ -33,6 +33,13 @@ from micropython import const
 from adafruit_bus_device import spi_device
 
 try:
+    from typing import Optional
+    from digitalio import DigitalInOut
+    from busio import SPI
+except ImportError:
+    pass
+
+try:
     import framebuf
 except ImportError:
     import adafruit_framebuf as framebuf
@@ -81,8 +88,15 @@ class ST7565(framebuf.FrameBuffer):
     CMD_SET_STATIC_REG = const(0x00)
 
     def __init__(
-        self, spi, dc_pin, cs_pin, reset_pin=None, *, contrast=0, baudrate=1000000
-    ):
+        self,
+        spi: SPI,
+        dc_pin: DigitalInOut,
+        cs_pin: DigitalInOut,
+        reset_pin: Optional[DigitalInOut] = None,
+        *,
+        contrast: int = 0,
+        baudrate: int = 1000000
+    ) -> None:
         self._dc_pin = dc_pin
         dc_pin.switch_to_output(value=False)
 
@@ -127,7 +141,7 @@ class ST7565(framebuf.FrameBuffer):
         # Contrast
         self.contrast = contrast
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the display"""
         if self._reset_pin:
             # Toggle RST low to reset.
@@ -136,13 +150,13 @@ class ST7565(framebuf.FrameBuffer):
             self._reset_pin.value = True
             time.sleep(0.5)
 
-    def write_cmd(self, cmd):
+    def write_cmd(self, cmd: int) -> None:
         """Send a command to the SPI device"""
         self._dc_pin.value = False
         with self.spi_device as spi:
             spi.write(bytearray([cmd]))  # pylint: disable=no-member
 
-    def show(self):
+    def show(self) -> None:
         """write out the frame buffer via SPI"""
         for page in self.pagemap:
             # Home cursor on the page
@@ -163,12 +177,12 @@ class ST7565(framebuf.FrameBuffer):
                 spi.write(self.buffer[row_start:row_stop])  # pylint: disable=no-member
 
     @property
-    def invert(self):
+    def invert(self) -> bool:
         """Whether the display is inverted, cached value"""
         return self._invert
 
     @invert.setter
-    def invert(self, val):
+    def invert(self, val: bool) -> None:
         """Set invert on or normal display on"""
         self._invert = val
         if val:
@@ -177,12 +191,12 @@ class ST7565(framebuf.FrameBuffer):
             self.write_cmd(self.CMD_SET_DISP_NORMAL)
 
     @property
-    def contrast(self):
+    def contrast(self) -> int:
         """The cached contrast value"""
         return self._contrast
 
     @contrast.setter
-    def contrast(self, val):
+    def contrast(self, val: int) -> None:
         """Set contrast to specified value (should be 0-127)."""
         self._contrast = max(0, min(val, 0x7F))  # Clamp to values 0-0x7f
         self.write_cmd(self.CMD_SET_VOLUME_FIRST)
