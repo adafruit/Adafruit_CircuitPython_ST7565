@@ -29,13 +29,15 @@ Implementation Notes
 """
 
 import time
-from micropython import const
+
 from adafruit_bus_device import spi_device
+from micropython import const
 
 try:
     from typing import Optional
-    from digitalio import DigitalInOut
+
     from busio import SPI
+    from digitalio import DigitalInOut
 except ImportError:
     pass
 
@@ -50,8 +52,6 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ST7565.git"
 
 class ST7565(framebuf.FrameBuffer):
     """ST7565-based LCD display."""
-
-    # pylint: disable=too-many-instance-attributes
 
     LCDWIDTH = const(128)
     LCDHEIGHT = const(64)
@@ -95,7 +95,7 @@ class ST7565(framebuf.FrameBuffer):
         reset_pin: Optional[DigitalInOut] = None,
         *,
         contrast: int = 0,
-        baudrate: int = 1000000
+        baudrate: int = 1000000,
     ) -> None:
         self._dc_pin = dc_pin
         dc_pin.switch_to_output(value=False)
@@ -154,7 +154,7 @@ class ST7565(framebuf.FrameBuffer):
         """Send a command to the SPI device"""
         self._dc_pin.value = False
         with self.spi_device as spi:
-            spi.write(bytearray([cmd]))  # pylint: disable=no-member
+            spi.write(bytearray([cmd]))
 
     def show(self) -> None:
         """write out the frame buffer via SPI"""
@@ -174,7 +174,7 @@ class ST7565(framebuf.FrameBuffer):
             # slice page from buffer and pack bits to bytes then send to display
             self._dc_pin.value = True
             with self.spi_device as spi:
-                spi.write(self.buffer[row_start:row_stop])  # pylint: disable=no-member
+                spi.write(self.buffer[row_start:row_stop])
 
     @property
     def invert(self) -> bool:
