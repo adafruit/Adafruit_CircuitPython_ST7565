@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import busio
 import digitalio
